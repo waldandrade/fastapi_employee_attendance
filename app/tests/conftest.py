@@ -1,10 +1,10 @@
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from app.database import Base
 from app.schemas import User, ScheduleMethod, AttendanceStatus
 from app.repositories import user
-from datetime import datetime, date, time
+from datetime import datetime
 from app.models import Attendance
 
 
