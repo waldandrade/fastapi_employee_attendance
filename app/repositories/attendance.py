@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app import models, schemas
 from fastapi import HTTPException, status
+from app.schemas import AttendanceStatus
 
 
 def get_all(db: Session):
@@ -16,7 +17,7 @@ def create(request: schemas.Attendance, current_user: schemas.User, db: Session)
                             detail=f"User with the email {current_user.email} is not available")
 
     new_attendance = models.Attendance(
-        date=request.date, status=request.status, employee_id=user.id)
+        date=request.date, status=AttendanceStatus(request.status), employee_id=user.id)
     db.add(new_attendance)
     db.commit()
     db.refresh(new_attendance)
