@@ -20,7 +20,11 @@ def all(db: Session = Depends(get_db), current_user: schemas.User = Depends(oaut
 
 @router.post('/', status_code=status.HTTP_201_CREATED,)
 def create(request: schemas.Attendance, db: Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
-    return attendance.create(request, db)
+    print(current_user)
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"User with the email {current_user.email} is not available")
+    return attendance.create(request, current_user, db)
 
 
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)

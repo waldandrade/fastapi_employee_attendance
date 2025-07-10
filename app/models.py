@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 
 
 class AttendanceStatus(enum.Enum):
-    ENTERING = 'entering'
-    EXITING = 'exiting'
+    ENTERING = 'ENTERING'
+    EXITING = 'EXITING'
 
 
 class ScheduleMethod(enum.Enum):

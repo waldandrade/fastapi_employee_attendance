@@ -1,9 +1,10 @@
 from typing import Optional
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class AttendanceBase(BaseModel):
-    data: str
+    date: datetime
     status: str
 
 
@@ -27,8 +28,8 @@ class ShowUser(BaseModel):
 
 
 class ShowAttendance(AttendanceBase):
-    title: str
-    body: str
+    date: datetime
+    status: str
     employee: ShowUser
 
     class Config():
