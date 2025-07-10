@@ -8,9 +8,15 @@ def get_all(db: Session):
     return attendances
 
 
-def create(request: schemas.Attendance, db: Session):
+def create(request: schemas.Attendance, current_user: schemas.User, db: Session):
+    user = db.query(models.User).filter(
+        models.User.email == current_user.email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"User with the email {current_user.email} is not available")
+
     new_attendance = models.Attendance(
-        title=request.title, body=request.body, user_id=1)
+        date=request.date, status=request.status, employee_id=user.id)
     db.add(new_attendance)
     db.commit()
     db.refresh(new_attendance)
