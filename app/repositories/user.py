@@ -6,9 +6,15 @@ from app.lib.crypt import Hash
 from app.schemas import ScheduleMethod
 
 
+def get_schedule_method(method: str):
+    if method is not None:
+        return ScheduleMethod(method)
+    return None
+
+
 def create(request: schemas.User, db: Session):
     new_user = models.User(
-        name=request.name, email=request.email, password=Hash.bcrypt(request.password), schedule_method=ScheduleMethod(request.schedule_method))
+        name=request.name, email=request.email, password=Hash.bcrypt(request.password), is_superuser=request.is_superuser, schedule_method=get_schedule_method(request.schedule_method),)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
