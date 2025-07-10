@@ -1,10 +1,22 @@
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from contextlib import asynccontextmanager
+from functools import lru_cache
 from fastapi import FastAPI
 from app import models
-from app.database import engine
+from app.database import engine, init_db, get_db
 from app.routers import user, auth, attendance
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app=FastAPI):
+    with Session(engine) as db:
+        init_db(db)
+        yield
+
+app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

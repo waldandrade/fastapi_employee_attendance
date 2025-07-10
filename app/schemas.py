@@ -28,10 +28,11 @@ class Attendance(AttendanceBase):
 
 class User(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
-    name: str
+    name: Optional[str] = None
     email: str
     password: str
-    schedule_method: ScheduleMethod
+    is_superuser: Optional[bool] = False
+    schedule_method: Optional[ScheduleMethod] = None
 
 
 class ShowUser(BaseModel):
