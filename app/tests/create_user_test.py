@@ -4,6 +4,7 @@ from app.repositories import attendance
 from app.schemas import ScheduleMethod, AttendanceStatus, User, Attendance
 from app.models import Attendance as AttendanceModel
 from datetime import datetime, timedelta
+from fastapi.exceptions import HTTPException
 
 
 def test_should_create(db_session, current_user):
@@ -17,7 +18,7 @@ def test_user_six_hour_can_not_pause(db_session, current_user_no_pauses, mock_at
     tempo_adicional = timedelta(hours=1, minutes=30)
     new_attendance = Attendance(
         date=mock_attendance_and_retrieve.date + tempo_adicional, status=AttendanceStatus.PAUSE_STARTING)
-    with pytest.raises((TypeError, KeyError)):
+    with pytest.raises((HTTPException)):
         attendance.create(
             new_attendance, current_user_no_pauses, db_session)
 
