@@ -19,5 +19,6 @@ def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordReque
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Incorrect password")
 
-    access_token = jwt_token.create_access_token(data={"sub": user.email})
+    access_token = jwt_token.create_access_token(
+        data={"sub": user.email, "is_superuser": user.is_superuser})
     return {"access_token": access_token, "token_type": "bearer"}

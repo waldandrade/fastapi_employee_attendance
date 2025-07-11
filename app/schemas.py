@@ -37,9 +37,10 @@ class User(BaseModel):
 
 class ShowUser(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    name: str
+    name: Optional[str] = None
     email: str
-    schedule_method: str
+    schedule_method: Optional[str] = None
+    is_superuser: Optional[bool] = False
 
 
 class ShowAttendance(AttendanceBase):
@@ -61,3 +62,5 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+    is_superuser: Optional[bool] = None
+    exp: Optional[datetime] = None
