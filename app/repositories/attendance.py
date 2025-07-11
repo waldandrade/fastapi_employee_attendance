@@ -49,8 +49,9 @@ def create(request: schemas.Attendance, current_user: schemas.User, db: Session)
     recent_attendance = get_most_recent_entry_by_day(
         request.date, user, db)
 
-    ensure_journey(user, request.date, AttendanceStatus(
-        request.status), recent_attendance)
+    if recent_attendance is not None:
+        ensure_journey(user, request.date, AttendanceStatus(
+            request.status), recent_attendance)
 
     new_attendance = models.Attendance(
         date=request.date, status=AttendanceStatus(request.status), employee_id=user.id)
