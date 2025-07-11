@@ -1,10 +1,9 @@
-from fastapi import Depends
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
-from functools import lru_cache
 from fastapi import FastAPI
 from app import models
-from app.database import engine, init_db, get_db
+from app.database import engine
+from app.initial_data import init_db
 from app.routers import user, auth, attendance
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
