@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session
 from app.database import Base
 from app.schemas import User, ScheduleMethod, AttendanceStatus
 from app.repositories import user
