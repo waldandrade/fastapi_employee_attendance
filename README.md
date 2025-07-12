@@ -1,29 +1,16 @@
 ## fastapi_employee_attendance
 ### Python/FastAPI application
 
-Project structure:
-```
-├── compose.yaml
-├── Dockerfile
-├── requirements.txt
-├── app
-    ├── main.py
-    ├── __init__.py
+## Copie o arquivo .env.example e renomeie para .env, defina os valores
+## Deploy with unicorn
 
+```shell
+uvicorn app.main:app --reload
 ```
+## Testando localmente
 
-[_compose.yaml_](compose.yaml)
-```
-services:
-  api:
-    build: .
-    container_name: fastapi-application
-    environment:
-      PORT: 8000
-    ports:
-      - '8000:8000'
-    restart: "no"
-
+```shell
+pytest
 ```
 
 ## Deploy with docker compose
