@@ -2,13 +2,24 @@ services:
   api:
     build:
       context: .
-      target: builder
+      dockerfile: Dockerfile
     container_name: fastapi-application
     environment:
       PORT: 8000
+      APP_NAME: Employee Attendance
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: employee_attendances
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      FIRST_SUPERUSER: superuser@test.com
+      FIRST_SUPERUSER_PASSWORD: 123456
     ports:
       - '8000:8000'
     restart: "no"
+    depends_on:
+     - db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     develop:
       watch: 
         - action: sync
@@ -18,3 +29,16 @@ services:
         - action: sync
           path: requiremens.txt
           target: /app
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: employee_attendances
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
