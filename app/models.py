@@ -1,8 +1,6 @@
-import enum
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, Boolean
-from sqlalchemy.orm import relationship
 from app.schemas import AttendanceStatus, ScheduleMethod
-from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 

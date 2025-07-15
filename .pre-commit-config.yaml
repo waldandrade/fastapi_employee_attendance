@@ -4,22 +4,23 @@ repos:
       - id: pylint
         name: pylint
         entry: pylint
-        language: python
+        language: system
         types: [python]
         args:
           [
-            "-rn",
-            "-sn",
             "--rcfile=.pylintrc",
             "--load.plugins=pylint.extensions.docparams",
+            --ignore-patterns=.venv
           ]
   - repo: local
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest
-        language: python
+        entry: pytest tests
+        language: system
         types: [python]
+        pass_filenames: false
+        always_run: true
   - repo: local
     hooks:
       - id: requirements
@@ -27,4 +28,4 @@ repos:
         entry: bash -c 'pip3 freeze > requirements.txt; git add requirements.txt'
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]

@@ -1,10 +1,9 @@
+from datetime import datetime
+from sqlalchemy.orm import sessionmaker, scoped_session
 import pytest
 from app.infra.db.settings.connections import DBConnectionHandler
-from sqlalchemy.orm import sessionmaker, scoped_session
-# from app.database import Base
 from app.schemas import User, ScheduleMethod, AttendanceStatus
 from app.repositories import user
-from datetime import datetime
 from app import models
 from app.models import Attendance
 
@@ -13,8 +12,8 @@ def db_session():
     db_connection_handle = DBConnectionHandler()
     engine = db_connection_handle.get_engine()
     models.Base.metadata.create_all(engine)
-    Session = scoped_session(sessionmaker(bind=engine))
-    session = Session()
+    session_factory = scoped_session(sessionmaker(bind=engine))
+    session = session_factory()
     yield session
     session.rollback()  # Rollback changes after each test
     session.close()
@@ -61,6 +60,7 @@ def current_user_no_pauses(db_session):
 def mock_attendance_and_retrieve(db_session, current_user_no_pauses):
     # Entradas dia 9/7
     new_attendance = Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
-                                status=AttendanceStatus.ENTERING, employee_id=current_user_no_pauses.id)
+                                status=AttendanceStatus.ENTERING,
+                                employee_id=current_user_no_pauses.id)
     db_session.add(new_attendance)
     return new_attendance

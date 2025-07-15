@@ -1,21 +1,20 @@
-from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
+from sqlalchemy.orm import Session
 from fastapi import FastAPI
-from app import models
-from app.database import engine
+from fastapi.middleware.cors import CORSMiddleware
 from app.initial_data import init_db
 from app.routers import user, auth, attendance
-from fastapi.middleware.cors import CORSMiddleware
-from app.config import settings
+from app.infra.db.settings.connections import DBConnectionHandler
 
-
+db_connection_handle = DBConnectionHandler()
+engine = db_connection_handle.get_engine()
 @asynccontextmanager
-async def lifespan(app=FastAPI):
+async def lifespan():
     with Session(engine) as db:
         init_db(db)
         yield
 
-app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
+app = FastAPI(title='Employee Attendance', lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,8 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-models.Base.metadata.create_all(engine)
 
 app.include_router(auth.router)
 app.include_router(user.router)

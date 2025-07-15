@@ -24,5 +24,5 @@ def verify_token(token: str, credentials_exception):
         exp: datetime = payload.get('exp')
         is_superuser: bool = payload.get('is_superuser')
         return schemas.TokenData(email=email, is_superuser=is_superuser, exp=exp)
-    except JWTError:
-        raise credentials_exception
+    except JWTError as exc:
+        raise credentials_exception from exc

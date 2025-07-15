@@ -1,8 +1,8 @@
-from sqlalchemy.orm import Session
-from app import models, schemas
-from fastapi import HTTPException, status
-from app.schemas import AttendanceStatus, ScheduleMethod
 from datetime import date, datetime, time
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from app import models, schemas
+from app.schemas import AttendanceStatus, ScheduleMethod
 
 
 def get_all(db: Session):
@@ -10,23 +10,29 @@ def get_all(db: Session):
     return attendances
 
 
-def ensure_journey(user: models.User, date: datetime, attendance_status: AttendanceStatus, last_attendance_of_day: models.Attendance):
-    # TODO Implementar mais regras aqui
+def ensure_journey(
+        user: models.User,
+        attendance_status: AttendanceStatus,
+        last_attendance_of_day: models.Attendance):
     if AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.EXITING:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Day journey already endded")
+                            detail="Day journey already endded")
 
-    if AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.PAUSE_STARTING and attendance_status != AttendanceStatus.PAUSE_ENDING:
+    if (AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.PAUSE_STARTING and
+        attendance_status != AttendanceStatus.PAUSE_ENDING):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Pause must to be endded")
+                            detail="Pause must to be endded")
 
     if ScheduleMethod(user.schedule_method) == ScheduleMethod.SIX_HOURS_WITHOUT_BREAK:
-        if AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.ENTERING and attendance_status != AttendanceStatus.EXITING:
+        if (AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.ENTERING and
+            attendance_status != AttendanceStatus.EXITING):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail=f"Attendance can not be created")
+                                detail="Attendance can not be created")
 
 
-def get_most_recent_entry_by_day(target_date: date, employee: models.User, db: Session) -> models.Attendance | None:
+def get_most_recent_entry_by_day(target_date: date,
+                                 employee: models.User,
+                                 db: Session) -> models.Attendance | None:
     start_of_day = datetime.combine(
         target_date.date(), time.min)
     end_of_day = datetime.combine(
@@ -34,7 +40,8 @@ def get_most_recent_entry_by_day(target_date: date, employee: models.User, db: S
 
     entrada_mais_recente = db.query(models.Attendance) \
         .filter(models.Attendance.date >= start_of_day,
-                models.Attendance.date <= end_of_day, models.Attendance.employee_id == employee.id) \
+                models.Attendance.date <= end_of_day,
+                models.Attendance.employee_id == employee.id) \
         .order_by(models.Attendance.date.desc()) \
         .first()
     return entrada_mais_recente
@@ -50,7 +57,7 @@ def create(request: schemas.Attendance, current_user: schemas.User, db: Session)
         request.date, user, db)
 
     if recent_attendance is not None:
-        ensure_journey(user, request.date, AttendanceStatus(
+        ensure_journey(user, AttendanceStatus(
             request.status), recent_attendance)
 
     new_attendance = models.Attendance(
@@ -61,34 +68,34 @@ def create(request: schemas.Attendance, current_user: schemas.User, db: Session)
     return new_attendance
 
 
-def destroy(id: int, db: Session):
-    attendance = db.query(models.Attendance).filter(models.Attendance.id == id)
+def destroy(item_id: int, db: Session):
+    attendance = db.query(models.Attendance).filter(models.Attendance.id == item_id)
 
     if not attendance.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Attendance with id {id} not found")
+                            detail=f"Attendance with id {item_id} not found")
 
     attendance.delete(synchronize_session=False)
     db.commit()
     return 'done'
 
 
-def update(id: int, request: schemas.Attendance, db: Session):
-    attendance = db.query(models.Attendance).filter(models.Attendance.id == id)
+def update(item_id: int, request: schemas.Attendance, db: Session):
+    attendance = db.query(models.Attendance).filter(models.Attendance.id == item_id)
 
     if not attendance.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Attendance with id {id} not found")
+                            detail=f"Attendance with id {item_id} not found")
 
     attendance.update(request)
     db.commit()
     return 'updated'
 
 
-def show(id: int, db: Session):
+def show(item_id: int, db: Session):
     attendance = db.query(models.Attendance).filter(
-        models.Attendance.id == id).first()
+        models.Attendance.id == item_id).first()
     if not attendance:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Attendance with the id {id} is not available")
+                            detail=f"Attendance with the id {item_id} is not available")
     return attendance
