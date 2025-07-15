@@ -1,7 +1,7 @@
 import os
 from pytest import Session
 from app import schemas
-from app.repositories import user
+from app.infra.db.repositories import users_repository
 from app.infra.db.models.users import User as UserModel
 
 
@@ -17,4 +17,4 @@ def init_db(db: Session) -> None:
                 password=super_user_password,
                 is_superuser=True,
             )
-            superuser = user.create(user_in, db)
+            superuser = users_repository.create(user_in, db)

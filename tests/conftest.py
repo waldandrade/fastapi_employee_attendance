@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 import pytest
 from app.infra.db.settings.connections import DBConnectionHandler
 from app.schemas import User, ScheduleMethod, AttendanceStatus
-from app.repositories import user
+from app.infra.db.repositories import users_repository
 from app.infra.db.models.attendances import Attendance as AttendanceModel
 from app.infra.db.settings.base import Base
 
@@ -23,7 +23,7 @@ def db_session():
 def current_user(db_session):
     new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
                     password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
-    return user.create(new_user, db_session)
+    return users_repository.create(new_user, db_session)
 
 @pytest.fixture
 def mock_attendances_and_get_recent(db_session, current_user):
@@ -53,7 +53,7 @@ def mock_attendances_and_get_recent(db_session, current_user):
 def current_user_no_pauses(db_session):
     new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
                     password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
-    return user.create(new_user, db_session)
+    return users_repository.create(new_user, db_session)
 
 
 @pytest.fixture
