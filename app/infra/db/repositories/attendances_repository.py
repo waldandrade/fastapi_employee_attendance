@@ -1,10 +1,11 @@
 from datetime import date, datetime, time
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from app import schemas
-from app.schemas import AttendanceStatus, ScheduleMethod
 from app.infra.db.models.users import User as UserModel
 from app.infra.db.models.attendances import Attendance as AttendanceModel
+from app.domain.entities.attendances import Attendance as AttendanceEntity
+from app.domain.entities.users import User as UserEntity
+from app.commons.enums import AttendanceStatus, ScheduleMethod
 
 
 class AttendanceRepository:
@@ -23,20 +24,20 @@ class AttendanceRepository:
                                 detail="Day journey already endded")
 
         if (AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.PAUSE_STARTING and
-            attendance_status != AttendanceStatus.PAUSE_ENDING):
+                attendance_status != AttendanceStatus.PAUSE_ENDING):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Pause must to be endded")
 
         if ScheduleMethod(user.schedule_method) == ScheduleMethod.SIX_HOURS_WITHOUT_BREAK:
             if (AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.ENTERING and
-                attendance_status != AttendanceStatus.EXITING):
+                    attendance_status != AttendanceStatus.EXITING):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                     detail="Attendance can not be created")
 
     @classmethod
     def get_most_recent_entry_by_day(cls, target_date: date,
-                                    employee: UserModel,
-                                    db: Session) -> AttendanceModel | None:
+                                     employee: UserModel,
+                                     db: Session) -> AttendanceModel | None:
         start_of_day = datetime.combine(
             target_date.date(), time.min)
         end_of_day = datetime.combine(
@@ -50,9 +51,8 @@ class AttendanceRepository:
             .first()
         return entrada_mais_recente
 
-
     @classmethod
-    def create(cls, request: schemas.Attendance, current_user: schemas.User, db: Session):
+    def create(cls, request: AttendanceEntity, current_user: UserEntity, db: Session):
         user = db.query(UserModel).filter(
             UserModel.email == current_user.email).first()
         if not user:
@@ -74,7 +74,8 @@ class AttendanceRepository:
 
     @classmethod
     def destroy(cls, item_id: int, db: Session):
-        attendance = db.query(AttendanceModel).filter(AttendanceModel.id == item_id)
+        attendance = db.query(AttendanceModel).filter(
+            AttendanceModel.id == item_id)
 
         if not attendance.first():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -85,8 +86,9 @@ class AttendanceRepository:
         return 'done'
 
     @classmethod
-    def update(cls, item_id: int, request: schemas.Attendance, db: Session):
-        attendance = db.query(AttendanceModel).filter(AttendanceModel.id == item_id)
+    def update(cls, item_id: int, request: AttendanceEntity, db: Session):
+        attendance = db.query(AttendanceModel).filter(
+            AttendanceModel.id == item_id)
 
         if not attendance.first():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

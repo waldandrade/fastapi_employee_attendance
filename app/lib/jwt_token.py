@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from app import schemas
+from app.commons.oauth import TokenData
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -23,6 +23,6 @@ def verify_token(token: str, credentials_exception):
             raise credentials_exception
         exp: datetime = payload.get('exp')
         is_superuser: bool = payload.get('is_superuser')
-        return schemas.TokenData(email=email, is_superuser=is_superuser, exp=exp)
+        return TokenData(email=email, is_superuser=is_superuser, exp=exp)
     except JWTError as exc:
         raise credentials_exception from exc

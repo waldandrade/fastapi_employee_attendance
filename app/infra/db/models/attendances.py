@@ -1,7 +1,8 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum, Boolean
-from app.schemas import AttendanceStatus
 from app.infra.db.settings.base import Base
+from app.commons.enums import AttendanceStatus
+
 
 class Attendance(Base):
     __tablename__ = 'attendances'

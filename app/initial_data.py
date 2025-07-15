@@ -1,8 +1,8 @@
 import os
 from pytest import Session
-from app import schemas
 from app.infra.db.repositories.users_repository import UserRepository
 from app.infra.db.models.users import User as UserModel
+from app.domain.entities.users import User as UserEntity
 
 
 def init_db(db: Session) -> None:
@@ -12,7 +12,7 @@ def init_db(db: Session) -> None:
         superuser = db.query(UserModel).filter(
             UserModel.email == super_user_email).first()
         if not superuser:
-            user_in = schemas.User(
+            user_in = UserEntity(
                 email=super_user_email,
                 password=super_user_password,
                 is_superuser=True,

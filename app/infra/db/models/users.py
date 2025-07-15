@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Enum, Boolean
-from app.schemas import ScheduleMethod
 from app.infra.db.settings.base import Base
+from app.commons.enums import ScheduleMethod
+
 
 class User(Base):
     __tablename__ = 'users'

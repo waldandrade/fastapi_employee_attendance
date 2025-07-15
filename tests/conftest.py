@@ -1,11 +1,13 @@
 from datetime import datetime
 import pytest
 from app.infra.db.settings.connections import DBConnectionHandler
-from app.schemas import User, ScheduleMethod, AttendanceStatus
 from app.infra.db.repositories.users_repository import UserRepository
 from app.infra.db.models.attendances import Attendance as AttendanceModel
 from app.infra.db.settings.base import Base
 from app.infra.db.models.users import User as UserModel
+from app.domain.entities.users import User as UserEntity
+from app.commons.enums import ScheduleMethod, AttendanceStatus
+
 
 @pytest.fixture
 def db_session():
@@ -21,12 +23,13 @@ def db_session():
 
 @pytest.fixture
 def current_user(db_session):
-    new_user = User(email="test3@test.com", name="Waldney Souza de Andrade",
-                    password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
+    new_user = UserEntity(email="test3@test.com", name="Waldney Souza de Andrade",
+                          password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
     users = db_session.query(UserModel).all()
     print(users)
     users_repository = UserRepository()
     return users_repository.create(new_user, db_session)
+
 
 @pytest.fixture
 def mock_attendances_and_get_recent(db_session, current_user):
@@ -46,7 +49,8 @@ def mock_attendances_and_get_recent(db_session, current_user):
     db_session.add(AttendanceModel(date=datetime(2025, 7, 9, 9, 45, 0),
                    status=AttendanceStatus.EXITING, employee_id=current_user.id))
     recent_attendance = AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
-                                   status=AttendanceStatus.ENTERING, employee_id=current_user.id)
+                                        status=AttendanceStatus.ENTERING,
+                                        employee_id=current_user.id)
     db_session.add(AttendanceModel(date=recent_attendance,
                    status=AttendanceStatus.ENTERING, employee_id=current_user.id))
     return recent_attendance
@@ -54,8 +58,8 @@ def mock_attendances_and_get_recent(db_session, current_user):
 
 @pytest.fixture
 def current_user_no_pauses(db_session):
-    new_user = User(email="test3@test.com", name="Waldney Souza de Andrade",
-                    password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
+    new_user = UserEntity(email="test3@test.com", name="Waldney Souza de Andrade",
+                          password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
     users_repository = UserRepository()
     return users_repository.create(new_user, db_session)
 
@@ -64,7 +68,7 @@ def current_user_no_pauses(db_session):
 def mock_attendance_and_retrieve(db_session, current_user_no_pauses):
     # Entradas dia 9/7
     new_attendance = AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
-                                status=AttendanceStatus.ENTERING,
-                                employee_id=current_user_no_pauses.id)
+                                     status=AttendanceStatus.ENTERING,
+                                     employee_id=current_user_no_pauses.id)
     db_session.add(new_attendance)
     return new_attendance
