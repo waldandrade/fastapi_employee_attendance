@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from app import schemas, database
 from app.lib import oauth2
-from app.infra.db.repositories import attendances_repository
+from app.infra.db.repositories.attendances_repository import AttendanceRepository
 
 router = APIRouter(
     prefix="/attendance",
@@ -15,6 +15,7 @@ get_db = database.get_db
 
 @router.get('/', response_model=List[schemas.ShowAttendance])
 def get_all(db: Session = Depends(get_db), _: schemas.User = Depends(oauth2.get_current_user)):
+    attendances_repository = AttendanceRepository()
     return attendances_repository.get_all(db)
 
 
@@ -25,6 +26,7 @@ def create(request: schemas.Attendance,
     if not current_user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"User with the email {current_user.email} is not available")
+    attendances_repository = AttendanceRepository()
     return attendances_repository.create(request, current_user, db)
 
 
@@ -32,6 +34,7 @@ def create(request: schemas.Attendance,
 def destroy(item_id: int,
             db: Session = Depends(get_db),
             _: schemas.User = Depends(oauth2.get_current_user)):
+    attendances_repository = AttendanceRepository()
     return attendances_repository.destroy(item_id, db)
 
 
@@ -40,6 +43,7 @@ def update(item_id: int,
            request: schemas.Attendance,
            db: Session = Depends(get_db),
            _: schemas.User = Depends(oauth2.get_current_user)):
+    attendances_repository = AttendanceRepository()
     return attendances_repository.update(item_id, request, db)
 
 
@@ -47,4 +51,5 @@ def update(item_id: int,
 def show(item_id: int,
          db: Session = Depends(get_db),
          _: schemas.User = Depends(oauth2.get_current_user)):
+    attendances_repository = AttendanceRepository()
     return attendances_repository.show(item_id, db)

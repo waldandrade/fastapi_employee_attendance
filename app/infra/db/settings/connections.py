@@ -1,5 +1,7 @@
 import os
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+
 
 class DBConnectionHandler:
     db_schema: str = os.getenv('DB_SCHEMA')
@@ -8,8 +10,18 @@ class DBConnectionHandler:
     db_user: str = os.getenv('DB_USER')
     db_password: str = os.getenv('DB_PASSWORD')
     db_name: str = os.getenv('DB_NAME')
+    scoped: bool = False
 
-    def __init__(self) -> None:
+    def __enter__(self):
+        make_session = sessionmaker(bind=self._engine) if not self.scoped else scoped_session(
+            sessionmaker(bind=self._engine))
+        self.session = make_session()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.session.close()
+
+    def __init__(self, scoped=False) -> None:
         credentials = ""
         if self.db_user is not None:
             credentials = "{}:{}@".format(self.db_user, self.db_password)
@@ -35,6 +47,8 @@ class DBConnectionHandler:
             self.db_name,
         )
         self._engine = self.__create_database_engine()
+        self.scoped = scoped
+        self.session = None
 
     def __create_database_engine(self):
         engine = create_engine(self.__connection_string)

@@ -1,28 +1,31 @@
 from datetime import datetime
-from sqlalchemy.orm import sessionmaker, scoped_session
 import pytest
 from app.infra.db.settings.connections import DBConnectionHandler
 from app.schemas import User, ScheduleMethod, AttendanceStatus
-from app.infra.db.repositories import users_repository
+from app.infra.db.repositories.users_repository import UserRepository
 from app.infra.db.models.attendances import Attendance as AttendanceModel
 from app.infra.db.settings.base import Base
+from app.infra.db.models.users import User as UserModel
 
 @pytest.fixture
 def db_session():
-    db_connection_handle = DBConnectionHandler()
-    engine = db_connection_handle.get_engine()
-    Base.metadata.create_all(engine)
-    session_factory = scoped_session(sessionmaker(bind=engine))
-    session = session_factory()
-    yield session
-    session.rollback()  # Rollback changes after each test
-    session.close()
+    with DBConnectionHandler(scoped=True) as database:
+        engine = database.get_engine()
+        print(engine)
+        Base.metadata.create_all(engine)
+        session = database.session
+        session.expunge_all()
+        yield session
+        session.rollback()  # Rollback changes after each test
 
 
 @pytest.fixture
 def current_user(db_session):
-    new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
+    new_user = User(email="test3@test.com", name="Waldney Souza de Andrade",
                     password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
+    users = db_session.query(UserModel).all()
+    print(users)
+    users_repository = UserRepository()
     return users_repository.create(new_user, db_session)
 
 @pytest.fixture
@@ -51,8 +54,9 @@ def mock_attendances_and_get_recent(db_session, current_user):
 
 @pytest.fixture
 def current_user_no_pauses(db_session):
-    new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
+    new_user = User(email="test3@test.com", name="Waldney Souza de Andrade",
                     password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
+    users_repository = UserRepository()
     return users_repository.create(new_user, db_session)
 
 
