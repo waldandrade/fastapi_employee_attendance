@@ -1,19 +1,21 @@
 from datetime import date, datetime, time
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from app import models, schemas
+from app import schemas
 from app.schemas import AttendanceStatus, ScheduleMethod
+from app.infra.db.models.users import User as UserModel
+from app.infra.db.models.attendances import Attendance as AttendanceModel
 
 
 def get_all(db: Session):
-    attendances = db.query(models.Attendance).all()
+    attendances = db.query(AttendanceModel).all()
     return attendances
 
 
 def ensure_journey(
-        user: models.User,
+        user: UserModel,
         attendance_status: AttendanceStatus,
-        last_attendance_of_day: models.Attendance):
+        last_attendance_of_day: AttendanceModel):
     if AttendanceStatus(last_attendance_of_day.status) == AttendanceStatus.EXITING:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Day journey already endded")
@@ -31,25 +33,25 @@ def ensure_journey(
 
 
 def get_most_recent_entry_by_day(target_date: date,
-                                 employee: models.User,
-                                 db: Session) -> models.Attendance | None:
+                                 employee: UserModel,
+                                 db: Session) -> AttendanceModel | None:
     start_of_day = datetime.combine(
         target_date.date(), time.min)
     end_of_day = datetime.combine(
         target_date.date(), time.max)
 
-    entrada_mais_recente = db.query(models.Attendance) \
-        .filter(models.Attendance.date >= start_of_day,
-                models.Attendance.date <= end_of_day,
-                models.Attendance.employee_id == employee.id) \
-        .order_by(models.Attendance.date.desc()) \
+    entrada_mais_recente = db.query(AttendanceModel) \
+        .filter(AttendanceModel.date >= start_of_day,
+                AttendanceModel.date <= end_of_day,
+                AttendanceModel.employee_id == employee.id) \
+        .order_by(AttendanceModel.date.desc()) \
         .first()
     return entrada_mais_recente
 
 
 def create(request: schemas.Attendance, current_user: schemas.User, db: Session):
-    user = db.query(models.User).filter(
-        models.User.email == current_user.email).first()
+    user = db.query(UserModel).filter(
+        UserModel.email == current_user.email).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"User with the email {current_user.email} is not available")
@@ -60,7 +62,7 @@ def create(request: schemas.Attendance, current_user: schemas.User, db: Session)
         ensure_journey(user, AttendanceStatus(
             request.status), recent_attendance)
 
-    new_attendance = models.Attendance(
+    new_attendance = AttendanceModel(
         date=request.date, status=AttendanceStatus(request.status), employee_id=user.id)
     db.add(new_attendance)
     db.commit()
@@ -69,7 +71,7 @@ def create(request: schemas.Attendance, current_user: schemas.User, db: Session)
 
 
 def destroy(item_id: int, db: Session):
-    attendance = db.query(models.Attendance).filter(models.Attendance.id == item_id)
+    attendance = db.query(AttendanceModel).filter(AttendanceModel.id == item_id)
 
     if not attendance.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -81,7 +83,7 @@ def destroy(item_id: int, db: Session):
 
 
 def update(item_id: int, request: schemas.Attendance, db: Session):
-    attendance = db.query(models.Attendance).filter(models.Attendance.id == item_id)
+    attendance = db.query(AttendanceModel).filter(AttendanceModel.id == item_id)
 
     if not attendance.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -93,8 +95,8 @@ def update(item_id: int, request: schemas.Attendance, db: Session):
 
 
 def show(item_id: int, db: Session):
-    attendance = db.query(models.Attendance).filter(
-        models.Attendance.id == item_id).first()
+    attendance = db.query(AttendanceModel).filter(
+        AttendanceModel.id == item_id).first()
     if not attendance:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Attendance with the id {item_id} is not available")

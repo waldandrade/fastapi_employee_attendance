@@ -4,14 +4,14 @@ import pytest
 from app.infra.db.settings.connections import DBConnectionHandler
 from app.schemas import User, ScheduleMethod, AttendanceStatus
 from app.repositories import user
-from app import models
-from app.models import Attendance
+from app.infra.db.models.attendances import Attendance as AttendanceModel
+from app.infra.db.settings.base import Base
 
 @pytest.fixture
 def db_session():
     db_connection_handle = DBConnectionHandler()
     engine = db_connection_handle.get_engine()
-    models.Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
     session_factory = scoped_session(sessionmaker(bind=engine))
     session = session_factory()
     yield session
@@ -28,23 +28,23 @@ def current_user(db_session):
 @pytest.fixture
 def mock_attendances_and_get_recent(db_session, current_user):
     # Entradas dia 9/7
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
+    db_session.add(AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
                    status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 11, 30, 0),
+    db_session.add(AttendanceModel(date=datetime(2025, 7, 9, 11, 30, 0),
                    status=AttendanceStatus.EXITING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 9, 0, 0),
+    db_session.add(AttendanceModel(date=datetime(2025, 7, 9, 9, 0, 0),
                    status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
+    db_session.add(AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
                    status=AttendanceStatus.EXITING, employee_id=current_user.id))
 
     # Entradas dia 10/7
-    db_session.add(Attendance(date=datetime(2025, 7, 10, 8, 0, 0),
+    db_session.add(AttendanceModel(date=datetime(2025, 7, 10, 8, 0, 0),
                    status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 9, 45, 0),
+    db_session.add(AttendanceModel(date=datetime(2025, 7, 9, 9, 45, 0),
                    status=AttendanceStatus.EXITING, employee_id=current_user.id))
-    recent_attendance = Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
+    recent_attendance = AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
                                    status=AttendanceStatus.ENTERING, employee_id=current_user.id)
-    db_session.add(Attendance(date=recent_attendance,
+    db_session.add(AttendanceModel(date=recent_attendance,
                    status=AttendanceStatus.ENTERING, employee_id=current_user.id))
     return recent_attendance
 
@@ -59,7 +59,7 @@ def current_user_no_pauses(db_session):
 @pytest.fixture
 def mock_attendance_and_retrieve(db_session, current_user_no_pauses):
     # Entradas dia 9/7
-    new_attendance = Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
+    new_attendance = AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
                                 status=AttendanceStatus.ENTERING,
                                 employee_id=current_user_no_pauses.id)
     db_session.add(new_attendance)

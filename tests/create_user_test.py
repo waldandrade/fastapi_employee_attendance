@@ -3,7 +3,7 @@ import pytest
 from fastapi.exceptions import HTTPException
 from app.repositories import attendance
 from app.schemas import AttendanceStatus, Attendance
-from app.models import Attendance as AttendanceModel
+from app.infra.db.models.attendances import Attendance as AttendanceModel
 
 @pytest.mark.skip(reason="Teste sensível")
 def test_should_create(db_session, current_user):
