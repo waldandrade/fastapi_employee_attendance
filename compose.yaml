@@ -7,11 +7,12 @@ services:
     environment:
       PORT: 8000
       APP_NAME: Employee Attendance
-      POSTGRES_SERVER: db
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: employee_attendances
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      DB_SCHEMA: postgresql+pycopg2
+      DB_SERVER: db
+      DB_PORT: 5432
+      DB_NAME: employee_attendances
+      DN_USER: postgres
+      DB_PASSWORD: postgres
       FIRST_SUPERUSER: superuser@test.com
       FIRST_SUPERUSER_PASSWORD: 123456
     ports:

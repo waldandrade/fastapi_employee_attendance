@@ -5,15 +5,15 @@ from app.config import settings
 
 # SQLALCHAMY_DATABASE_URL = 'sqlite:///./attendance.db'
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+# engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False,)
+# SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False,)
 
-Base = declarative_base()
+# Base = declarative_base()
 
 
 def get_db():
-    db = SessionLocal()
+    db = None
     try:
         yield db
     finally:

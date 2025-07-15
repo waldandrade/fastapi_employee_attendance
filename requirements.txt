@@ -10,3 +10,5 @@ pydantic-settings
 python-dotenv
 pydantic[email]
 psycopg2-binary
+pre-commit
+pylint

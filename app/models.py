@@ -1,9 +1,10 @@
 import enum
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, Boolean
-from app.database import Base
 from sqlalchemy.orm import relationship
 from app.schemas import AttendanceStatus, ScheduleMethod
+from sqlalchemy.orm import declarative_base
 
+Base = declarative_base()
 
 class Attendance(Base):
     __tablename__ = 'attendances'

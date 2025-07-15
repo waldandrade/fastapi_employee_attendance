@@ -1,17 +1,18 @@
 import pytest
-from sqlalchemy import create_engine
+from app.infra.db.settings.connections import DBConnectionHandler
 from sqlalchemy.orm import sessionmaker, scoped_session
-from app.database import Base
+# from app.database import Base
 from app.schemas import User, ScheduleMethod, AttendanceStatus
 from app.repositories import user
 from datetime import datetime
+from app import models
 from app.models import Attendance
-
 
 @pytest.fixture
 def db_session():
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
+    db_connection_handle = DBConnectionHandler()
+    engine = db_connection_handle.get_engine()
+    models.Base.metadata.create_all(engine)
     Session = scoped_session(sessionmaker(bind=engine))
     session = Session()
     yield session
@@ -24,7 +25,6 @@ def current_user(db_session):
     new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
                     password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
     return user.create(new_user, db_session)
-
 
 @pytest.fixture
 def mock_attendances_and_get_recent(db_session, current_user):
