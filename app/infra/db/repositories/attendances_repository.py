@@ -9,13 +9,14 @@ from app.commons.enums import AttendanceStatus, ScheduleMethod
 
 
 class AttendanceRepository:
-    @classmethod
-    def get_all(cls, db: Session):
-        attendances = db.query(AttendanceModel).all()
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all(self):
+        attendances = self.db.query(AttendanceModel).all()
         return attendances
 
-    @classmethod
-    def ensure_journey(cls,
+    def ensure_journey(self,
                        user: UserModel,
                        attendance_status: AttendanceStatus,
                        last_attendance_of_day: AttendanceModel):
@@ -34,16 +35,14 @@ class AttendanceRepository:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                     detail="Attendance can not be created")
 
-    @classmethod
-    def get_most_recent_entry_by_day(cls, target_date: date,
-                                     employee: UserModel,
-                                     db: Session) -> AttendanceModel | None:
+    def get_most_recent_entry_by_day(self, target_date: date,
+                                     employee: UserModel) -> AttendanceModel | None:
         start_of_day = datetime.combine(
             target_date.date(), time.min)
         end_of_day = datetime.combine(
             target_date.date(), time.max)
 
-        entrada_mais_recente = db.query(AttendanceModel) \
+        entrada_mais_recente = self.db.query(AttendanceModel) \
             .filter(AttendanceModel.date >= start_of_day,
                     AttendanceModel.date <= end_of_day,
                     AttendanceModel.employee_id == employee.id) \
@@ -51,30 +50,28 @@ class AttendanceRepository:
             .first()
         return entrada_mais_recente
 
-    @classmethod
-    def create(cls, request: AttendanceEntity, current_user: UserEntity, db: Session):
-        user = db.query(UserModel).filter(
+    def create(self, request: AttendanceEntity, current_user: UserEntity):
+        user = self.db.query(UserModel).filter(
             UserModel.email == current_user.email).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail=f"User with the email {current_user.email} is not available")
-        recent_attendance = cls.get_most_recent_entry_by_day(
-            request.date, user, db)
+        recent_attendance = self.get_most_recent_entry_by_day(
+            request.date, user)
 
         if recent_attendance is not None:
-            cls.ensure_journey(user, AttendanceStatus(
+            self.ensure_journey(user, AttendanceStatus(
                 request.status), recent_attendance)
 
         new_attendance = AttendanceModel(
             date=request.date, status=AttendanceStatus(request.status), employee_id=user.id)
-        db.add(new_attendance)
-        db.commit()
-        db.refresh(new_attendance)
+        self.db.add(new_attendance)
+        self.db.commit()
+        self.db.refresh(new_attendance)
         return new_attendance
 
-    @classmethod
-    def destroy(cls, item_id: int, db: Session):
-        attendance = db.query(AttendanceModel).filter(
+    def destroy(self, item_id: int):
+        attendance = self.db.query(AttendanceModel).filter(
             AttendanceModel.id == item_id)
 
         if not attendance.first():
@@ -82,12 +79,11 @@ class AttendanceRepository:
                                 detail=f"Attendance with id {item_id} not found")
 
         attendance.delete(synchronize_session=False)
-        db.commit()
+        self.db.commit()
         return 'done'
 
-    @classmethod
-    def update(cls, item_id: int, request: AttendanceEntity, db: Session):
-        attendance = db.query(AttendanceModel).filter(
+    def update(self, item_id: int, request: AttendanceEntity):
+        attendance = self.db.query(AttendanceModel).filter(
             AttendanceModel.id == item_id)
 
         if not attendance.first():
@@ -95,12 +91,11 @@ class AttendanceRepository:
                                 detail=f"Attendance with id {item_id} not found")
 
         attendance.update(request)
-        db.commit()
+        self.db.commit()
         return 'updated'
 
-    @classmethod
-    def show(cls, item_id: int, db: Session):
-        attendance = db.query(AttendanceModel).filter(
+    def show(self, item_id: int):
+        attendance = self.db.query(AttendanceModel).filter(
             AttendanceModel.id == item_id).first()
         if not attendance:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
