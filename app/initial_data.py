@@ -1,5 +1,5 @@
 import os
-from pytest import Session
+from sqlalchemy.orm import Session
 from app.infra.db.repositories.users_repository import UserRepository
 from app.infra.db.models.users import User as UserModel
 from app.domain.entities.users import User as UserEntity

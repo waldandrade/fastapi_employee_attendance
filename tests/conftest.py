@@ -12,7 +12,6 @@ from app.commons.enums import ScheduleMethod, AttendanceStatus
 def db_session():
     with DBConnectionHandler(scoped=True) as database:
         engine = database.get_engine()
-        print(engine)
         Base.metadata.create_all(engine)
         session = database.session
         session.expunge_all()

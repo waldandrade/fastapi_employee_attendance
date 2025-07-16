@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app import database
+from app.configs.dependencies import get_db
 from app.domain.use_cases.user.create_user import CreateUserUseCase
 from app.domain.use_cases.user.getall_users import GetAllUsersUseCase
 from app.domain.use_cases.user.profile_user import ProfileUserUseCase
@@ -14,8 +14,6 @@ router = APIRouter(
     prefix="/user",
     tags=['Users']
 )
-
-get_db = database.get_db
 
 
 def get_repository(db: Session = Depends(get_db)):

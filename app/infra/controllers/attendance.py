@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from app import database
+from app.configs.dependencies import get_db
 from app.lib import oauth2
 from app.domain.use_cases.attendance.create_attendance import CreateAttendanceUseCase
 from app.domain.use_cases.attendance.destroy_attendance import DestroyAttendanceUseCase
@@ -16,8 +16,6 @@ router = APIRouter(
     prefix="/attendance",
     tags=['Attendances']
 )
-
-get_db = database.get_db
 
 
 def get_repository(db: Session = Depends(get_db)):

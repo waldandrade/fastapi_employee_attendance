@@ -22,6 +22,7 @@ class DBConnectionHandler:
         self.session.close()
 
     def __init__(self, scoped=False) -> None:
+        print("instanciando ----")
         credentials = ""
         if self.db_user is not None:
             credentials = "{}:{}@".format(self.db_user, self.db_password)
