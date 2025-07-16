@@ -2,12 +2,14 @@ from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.initial_data import init_db
-from app.routers import user, auth, attendance
+from app.infra.controllers import attendance, user, auth
 from app.infra.db.settings.connections import DBConnectionHandler
+from app.initial_data import init_db
 
 db_connection_handle = DBConnectionHandler()
 engine = db_connection_handle.get_engine()
+
+
 @asynccontextmanager
 async def lifespan():
     with Session(engine) as db:
