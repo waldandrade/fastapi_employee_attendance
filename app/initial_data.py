@@ -17,5 +17,5 @@ def init_db(db: Session) -> None:
                 password=super_user_password,
                 is_superuser=True,
             )
-            users_repository = UserRepository()
-            superuser = users_repository.create(user_in, db)
+            users_repository = UserRepository(db)
+            superuser = users_repository.create(user_in)

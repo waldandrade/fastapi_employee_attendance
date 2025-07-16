@@ -4,7 +4,6 @@ from app.infra.db.settings.connections import DBConnectionHandler
 from app.infra.db.repositories.users_repository import UserRepository
 from app.infra.db.models.attendances import Attendance as AttendanceModel
 from app.infra.db.settings.base import Base
-from app.infra.db.models.users import User as UserModel
 from app.domain.entities.users import User as UserEntity
 from app.commons.enums import ScheduleMethod, AttendanceStatus
 
@@ -25,10 +24,8 @@ def db_session():
 def current_user(db_session):
     new_user = UserEntity(email="test3@test.com", name="Waldney Souza de Andrade",
                           password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
-    users = db_session.query(UserModel).all()
-    print(users)
-    users_repository = UserRepository()
-    return users_repository.create(new_user, db_session)
+    users_repository = UserRepository(db_session)
+    return users_repository.create(new_user)
 
 
 @pytest.fixture
@@ -60,8 +57,8 @@ def mock_attendances_and_get_recent(db_session, current_user):
 def current_user_no_pauses(db_session):
     new_user = UserEntity(email="test3@test.com", name="Waldney Souza de Andrade",
                           password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
-    users_repository = UserRepository()
-    return users_repository.create(new_user, db_session)
+    users_repository = UserRepository(db_session)
+    return users_repository.create(new_user)
 
 
 @pytest.fixture

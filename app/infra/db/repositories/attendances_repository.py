@@ -6,9 +6,10 @@ from app.infra.db.models.attendances import Attendance as AttendanceModel
 from app.domain.entities.attendances import Attendance as AttendanceEntity
 from app.domain.entities.users import User as UserEntity
 from app.commons.enums import AttendanceStatus, ScheduleMethod
+from app.infra.db.repositories.interfaces.i_attendances_repository import IAttendanceRepository
 
 
-class AttendanceRepository:
+class AttendanceRepository(IAttendanceRepository):
     def __init__(self, db: Session):
         self.db = db
 
