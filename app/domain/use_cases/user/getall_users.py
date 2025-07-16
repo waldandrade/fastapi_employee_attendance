@@ -1,4 +1,4 @@
-from app.infra.db.repositories.interfaces.i_users_repository import IUserRepository
+from app.domain.interfaces.i_users_repository import IUserRepository
 from .interfaces.i_getall_users import IGetAllUsers
 
 

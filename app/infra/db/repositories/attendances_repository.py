@@ -1,12 +1,12 @@
 from datetime import date, datetime, time
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from app.domain.interfaces.i_attendances_repository import IAttendanceRepository
 from app.infra.db.models.users import User as UserModel
 from app.infra.db.models.attendances import Attendance as AttendanceModel
 from app.domain.entities.attendances import Attendance as AttendanceEntity
 from app.domain.entities.users import User as UserEntity
 from app.commons.enums import AttendanceStatus, ScheduleMethod
-from app.infra.db.repositories.interfaces.i_attendances_repository import IAttendanceRepository
 
 
 class AttendanceRepository(IAttendanceRepository):

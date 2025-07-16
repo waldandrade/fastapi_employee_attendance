@@ -3,7 +3,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from app.infra.db.repositories.interfaces.i_users_repository import IUserRepository
+from app.domain.interfaces.i_users_repository import IUserRepository
 from app.lib.crypt import Hash
 from app.infra.db.models.users import User as UserModel
 from app.domain.entities.users import User as UserEntity

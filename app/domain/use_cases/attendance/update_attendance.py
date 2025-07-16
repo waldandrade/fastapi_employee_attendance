@@ -1,4 +1,4 @@
-from app.infra.db.repositories.interfaces.i_attendances_repository import IAttendanceRepository
+from app.domain.interfaces.i_attendances_repository import IAttendanceRepository
 from .interfaces.i_update_attendance import IUpdateAttendance
 
 
