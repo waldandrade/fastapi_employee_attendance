@@ -1,66 +1,71 @@
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from app.database import Base
-from app.schemas import User, ScheduleMethod, AttendanceStatus
-from app.repositories import user
 from datetime import datetime
-from app.models import Attendance
+from typing import List
+import pytest
+from sqlalchemy.orm import Session
+from app.infra.db.settings.connections import DBConnectionHandler
+from app.infra.db.repositories.users_repository import UserRepository
+from app.infra.db.models.attendances import Attendance as AttendanceModel
+from app.infra.db.settings.base import Base
+from app.domain.entities.users import User as UserEntity
+from app.commons.enums import ScheduleMethod, AttendanceStatus
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def db_session():
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    Session = scoped_session(sessionmaker(bind=engine))
-    session = Session()
-    yield session
-    session.rollback()  # Rollback changes after each test
-    session.close()
+    with DBConnectionHandler(scoped=True) as database:
+        engine = database.get_engine()
+        Base.metadata.create_all(engine)
+        session = database.session
+        session.expunge_all()
+        yield session
+        session.rollback()  # Rollback changes after each test
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def current_user(db_session):
-    new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
-                    password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
-    return user.create(new_user, db_session)
+    new_user = UserEntity(email="test3@test.com", name="Waldney Souza de Andrade",
+                          password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
+    users_repository = UserRepository(db_session)
+    return users_repository.create(new_user)
 
 
-@pytest.fixture
-def mock_attendances_and_get_recent(db_session, current_user):
-    # Entradas dia 9/7
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
-                   status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 11, 30, 0),
-                   status=AttendanceStatus.EXITING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 9, 0, 0),
-                   status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
-                   status=AttendanceStatus.EXITING, employee_id=current_user.id))
+@pytest.fixture(scope='function')
+def mock_attendances_and_get_list(db_session: Session, current_user) -> List[AttendanceModel]:
+    new_attendances = [
+        AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
+                        status=AttendanceStatus.ENTERING, employee_id=current_user.id),
+        AttendanceModel(date=datetime(2025, 7, 9, 11, 30, 0),
+                        status=AttendanceStatus.EXITING, employee_id=current_user.id),
+        AttendanceModel(date=datetime(2025, 7, 9, 9, 0, 0),
+                        status=AttendanceStatus.ENTERING, employee_id=current_user.id),
+        AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
+                        status=AttendanceStatus.EXITING, employee_id=current_user.id),
+        AttendanceModel(date=datetime(2025, 7, 10, 8, 0, 0),
+                        status=AttendanceStatus.ENTERING, employee_id=current_user.id),
+        AttendanceModel(date=datetime(2025, 7, 9, 9, 45, 0),
+                        status=AttendanceStatus.EXITING, employee_id=current_user.id),
+        AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
+                        status=AttendanceStatus.ENTERING,
+                        employee_id=current_user.id)]
+    db_session.add_all(new_attendances)
+    db_session.commit()
+    return new_attendances
 
-    # Entradas dia 10/7
-    db_session.add(Attendance(date=datetime(2025, 7, 10, 8, 0, 0),
-                   status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    db_session.add(Attendance(date=datetime(2025, 7, 9, 9, 45, 0),
-                   status=AttendanceStatus.EXITING, employee_id=current_user.id))
-    recent_attendance = Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
-                                   status=AttendanceStatus.ENTERING, employee_id=current_user.id)
-    db_session.add(Attendance(date=recent_attendance,
-                   status=AttendanceStatus.ENTERING, employee_id=current_user.id))
-    return recent_attendance
 
-
-@pytest.fixture
+@pytest.fixture(scope='function')
 def current_user_no_pauses(db_session):
-    new_user = User(email="test@test.com", name="Waldney Souza de Andrade",
-                    password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
-    return user.create(new_user, db_session)
+    new_user = UserEntity(email="test3@test.com", name="Waldney Souza de Andrade",
+                          password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK)
+    users_repository = UserRepository(db_session)
+    return users_repository.create(new_user)
 
 
-@pytest.fixture
-def mock_attendance_and_retrieve(db_session, current_user_no_pauses):
+@pytest.fixture(scope='function')
+def mock_attendance_and_retrieve(db_session, current_user_no_pauses) -> AttendanceModel:
     # Entradas dia 9/7
-    new_attendance = Attendance(date=datetime(2025, 7, 9, 10, 0, 0),
-                                status=AttendanceStatus.ENTERING, employee_id=current_user_no_pauses.id)
+    new_attendance = AttendanceModel(date=datetime(2025, 7, 9, 10, 0, 0),
+                                     status=AttendanceStatus.ENTERING,
+                                     employee_id=current_user_no_pauses.id)
     db_session.add(new_attendance)
+    db_session.commit()
     return new_attendance
