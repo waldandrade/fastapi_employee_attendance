@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.infra.db.settings.connections import DBConnectionHandler
 from app.infra.db.repositories.users_repository import UserRepository
 from app.infra.db.models.attendances import Attendance as AttendanceModel
+from app.infra.db.models.users import User as UserModel
 from app.infra.db.settings.base import Base
 from app.domain.entities.users import User as UserEntity
 from app.commons.enums import ScheduleMethod, AttendanceStatus
@@ -69,3 +70,20 @@ def mock_attendance_and_retrieve(db_session, current_user_no_pauses) -> Attendan
     db_session.add(new_attendance)
     db_session.commit()
     return new_attendance
+
+
+@pytest.fixture(scope='function')
+def mocked_users(db_session):
+    users = [
+        UserModel(email="test1@test.com", name="Waldney Souza de Andrade 1",
+                  password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK),
+        UserModel(email="test2@test.com", name="Waldney Souza de Andrade 2",
+                  password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK),
+        UserModel(email="test3@test.com", name="Waldney Souza de Andrade 3",
+                  password='123456', schedule_method=ScheduleMethod.SIX_HOURS_WITHOUT_BREAK),
+        UserModel(email="test4@test.com", name="Waldney Souza de Andrade 4",
+                  password='123456', schedule_method=ScheduleMethod.EIGHT_HOURS_WITH_BREAK)
+    ]
+    db_session.add_all(users)
+    db_session.commit()
+    return users
