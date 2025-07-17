@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import date
+from typing import List
 from app.domain.entities.attendances import Attendance as AttendanceEntity
 from app.domain.entities.users import User as UserEntity
 from app.infra.db.models.attendances import Attendance as AttendanceModel
@@ -9,7 +10,7 @@ from app.commons.enums import AttendanceStatus
 
 class IAttendanceRepository(ABC):
     @abstractmethod
-    def get_all(self) -> AttendanceModel: pass
+    def get_all(self) -> List[AttendanceModel]: pass
 
     @abstractmethod
     def ensure_journey(self,
